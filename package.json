@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
-    "start": "gulp dev"
+    "start": "gulp dev",
+    "test": "mocha --reporter spec test/config.js test"
   },
   "keywords": [],
   "author": "tran.bao51093@gmail.com",
@@ -18,9 +19,11 @@
     "babel-register": "^6.18.0",
     "eslint-config-airbnb-base": "^9.0.0",
     "eslint-plugin-import": "^2.0.1",
+    "expect": "^1.20.2",
     "gulp": "^3.9.1",
     "gulp-eslint": "^3.0.1",
     "gulp-shell": "^0.5.2",
+    "mocha": "^3.1.2",
     "nodemon": "^1.11.0",
     "rimraf": "^2.5.4",
     "run-sequence": "^1.2.2"
