@@ -7,12 +7,14 @@ import { getTime, getCategory, getEvent, getExtra, composeSyslogMsg } from '../s
 
 describe('Lib Test', () => {
   const syslogMsg = '<134>[2014-09-01 13:04:11] EFW: SYSTEM: prio=2 id=03200607 rev=2 event=bidir_ok localcfgver=258 remotecfgver=0';
+  const syslogMsgEvent = '<134>[2014-09-01 13:04:11] EFW: SYSTEM: prio=2 id=03200607 rev=2 event=bidir_ok';
   const notSyslogMsg = 'null';
 
   describe('getTime Test', () => {
     it('should return Either Right correct time', () => {
       const result = '2014-09-01 13:04:11';
       expect(getTime(syslogMsg)).toEqual(Either.Right(result));
+      expect(getTime(syslogMsgEvent)).toEqual(Either.Right(result));
     });
 
     it('should return Either Left null', () => {
@@ -24,6 +26,7 @@ describe('Lib Test', () => {
     it('should return Either Right correct category', () => {
       const result = 'SYSTEM';
       expect(getCategory(syslogMsg)).toEqual(Either.Right(result));
+      expect(getCategory(syslogMsgEvent)).toEqual(Either.Right(result));
     });
 
     it('should return Either Left null', () => {
@@ -35,6 +38,7 @@ describe('Lib Test', () => {
     it('should return Either Right correct time', () => {
       const result = 'bidir_ok';
       expect(getEvent(syslogMsg)).toEqual(Either.Right(result));
+      expect(getEvent(syslogMsgEvent)).toEqual(Either.Right(result));
     });
 
     it('should return Either Left null', () => {
@@ -64,13 +68,14 @@ describe('Lib Test', () => {
 
     it('should return Either Left null', () => {
       expect(getExtra(syslogMsgNoActionMsg)).toEqual(Either.Left(null));
+      expect(getExtra(syslogMsgEvent)).toEqual(Either.Left(null));
     });
   });
 
   describe('composeSyslogMsg Test', () => {
     const syslogMsgWithAction = '<134>[2014-09-01 13:04:11] EFW: SYSTEM: prio=2 id=03204001 rev=1 event=accept_configuration action=using_new_config';
     const ip = '127.0.0.1';
-    it('should return correct syslogMsg object', () => {
+    it('should return correct syslogMsg object with action', () => {
       const result = {
         time: '2014-09-01T10:04:11.000Z',
         ip,
@@ -80,6 +85,18 @@ describe('Lib Test', () => {
         // message: ignore for now
       };
       expect(composeSyslogMsg(syslogMsgWithAction, ip)).toEqual(result);
+    });
+
+    it('should return correct syslogMsg object with undefined action', () => {
+      const result = {
+        time: '2014-09-01T10:04:11.000Z',
+        ip,
+        cat: 'SYSTEM',
+        event: 'bidir_ok',
+        action: undefined,
+        // message: ignore for now
+      };
+      expect(composeSyslogMsg(syslogMsgEvent, ip)).toEqual(result);
     });
   });
 });

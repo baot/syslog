@@ -1,12 +1,18 @@
 import { curry, nth, compose, map } from 'ramda';
 import { Either } from 'monet';
 
-const syslogpattern = /^<.+>\[(.+)\]\sEFW:\s(.+):\sprio=(.+)\sid=(.+)\srev=(.+)\sevent=(.+?)\s(.+)/;
+const syslogpattern = /^<.+>\[(.+)\]\sEFW:\s(.+):\sprio=(.+)\sid=(.+)\srev=(.+)\sevent=(.+?)(\s.*)?$/;
 const syslogExtrapattern = /^action=(.+?)(\s(.+))?$/;
+
+//  chain :: Monad m => (a -> m b) -> m a -> m b
+const chain = curry((f, m) => m.map(f).join());
 
 // regex => str => Either(Right(List[str]), Left(null))
 const parse = curry((pattern, str) => {
-  const result = str.match(pattern);
+  let result;
+  if (str) {
+    result = str.match(pattern);
+  }
   return result ? Either.Right(result) : Either.Left(result);
 });
 
@@ -17,7 +23,7 @@ const parse = curry((pattern, str) => {
 const parseExtraHelper = (str) => {
   let message;
   let action;
-  const result = parse(syslogExtrapattern)(str);
+  const result = parse(syslogExtrapattern)(str.trim());
 
   if (result.isRight()) { // there is action
     if (map(nth(2))(result)) { // message will be 3rd of result
@@ -30,14 +36,16 @@ const parseExtraHelper = (str) => {
 
   // message is also the arg
   return {
-    message: str,
+    message: str.trim(),
     action,
   };
 };
 
 // getExtra :: (str: syslog) => {message: <message>/undefined, action: <action>/undefined}
 const getExtra = compose(
-  map(compose(parseExtraHelper, nth(7))),
+  map(parseExtraHelper),
+  chain(str => (str ? Either.Right(str) : Either.Left(null))),
+  map(nth(7)),
   parse(syslogpattern)
 );
 
@@ -59,9 +67,9 @@ const composeSyslogMsg = (msg, ip) => {
     ip,
     cat: getCategory(msg).right(),
     event: getEvent(msg).right(),
-    action: (getExtra(msg).right()) ? getExtra(msg).right().action : undefined,
+    action: (getExtra(msg).isRight()) ? getExtra(msg).right().action : undefined,
     // message: ignore for now
   };
 };
 
-export { composeSyslogMsg };
+export { getTime, getCategory, getEvent, getExtra, composeSyslogMsg };
