@@ -1,7 +1,7 @@
 /* eslint no-console: 0 */
 
 import syslogMsgServer from './syslogMsgServer';
-import restApp from './restApp';
+import syslogRestServer from './syslogRestServer/app';
 
 let restServer;
 
@@ -13,7 +13,7 @@ function start(syslogPort, restPort, callback) {
   });
 
   // Start listening for rest api
-  restServer = restApp.listen(restPort, () => {
+  restServer = syslogRestServer.listen(restPort, () => {
     console.info(`syslogRestServer listening on port ${restPort}`);
   });
 
