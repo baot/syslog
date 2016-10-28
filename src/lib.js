@@ -1,6 +1,7 @@
 import { curry, nth, compose, map } from 'ramda';
 import { Either } from 'monet';
 
+// eslint-disable-next-line max-len
 const syslogpattern = /^<.+>\[(.+)\]\sEFW:\s(.+):\sprio=(.+)\sid=(.+)\srev=(.+)\sevent=(.+?)(\s.*)?$/;
 const syslogExtrapattern = /^action=(.+?)(\s(.+))?$/;
 
