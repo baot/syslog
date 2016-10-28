@@ -3,41 +3,41 @@
 import expect from 'expect';
 import Either from 'monet';
 
-import { getTime, getCategory, getEvent, getExtra } from '../src/lib';
+import { getTime, getCategory, getEvent, getExtra, composeSyslogMsg } from '../src/lib';
 
 describe('Lib Test', () => {
   const syslogMsg = '<134>[2014-09-01 13:04:11] EFW: SYSTEM: prio=2 id=03200607 rev=2 event=bidir_ok localcfgver=258 remotecfgver=0';
   const notSyslogMsg = 'null';
 
   describe('getTime Test', () => {
-    it('getTime should return Either Right correct time', () => {
+    it('should return Either Right correct time', () => {
       const result = '2014-09-01 13:04:11';
       expect(getTime(syslogMsg)).toEqual(Either.Right(result));
     });
 
-    it('getTime should return Either Left null', () => {
+    it('should return Either Left null', () => {
       expect(getTime(notSyslogMsg)).toEqual(Either.Left(null));
     });
   });
 
   describe('getCategory Test', () => {
-    it('getCategory should return Either Right correct category', () => {
+    it('should return Either Right correct category', () => {
       const result = 'SYSTEM';
       expect(getCategory(syslogMsg)).toEqual(Either.Right(result));
     });
 
-    it('getCategory should return Either Left null', () => {
+    it('should return Either Left null', () => {
       expect(getTime(notSyslogMsg)).toEqual(Either.Left(null));
     });
   });
 
   describe('getEvent Test', () => {
-    it('getEvent should return Either Right correct time', () => {
+    it('should return Either Right correct time', () => {
       const result = 'bidir_ok';
       expect(getEvent(syslogMsg)).toEqual(Either.Right(result));
     });
 
-    it('getEvent should return Either Left null', () => {
+    it('should return Either Left null', () => {
       expect(getEvent(notSyslogMsg)).toEqual(Either.Left(null));
     });
   });
@@ -64,6 +64,22 @@ describe('Lib Test', () => {
 
     it('should return Either Left null', () => {
       expect(getExtra(syslogMsgNoActionMsg)).toEqual(Either.Left(null));
+    });
+  });
+
+  describe('composeSyslogMsg Test', () => {
+    const syslogMsgWithAction = '<134>[2014-09-01 13:04:11] EFW: SYSTEM: prio=2 id=03204001 rev=1 event=accept_configuration action=using_new_config';
+    const ip = '127.0.0.1';
+    it('should return correct syslogMsg object', () => {
+      const result = {
+        time: '2014-09-01T10:04:11.000Z',
+        ip,
+        cat: 'SYSTEM',
+        event: 'accept_configuration',
+        action: 'using_new_config',
+        // message: ignore for now
+      };
+      expect(composeSyslogMsg(syslogMsgWithAction, ip)).toEqual(result);
     });
   });
 });

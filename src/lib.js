@@ -47,10 +47,21 @@ const getTime = compose(map(nth(1)), parse(syslogpattern));
 // getCategory :: (str: syslog) => (str: <category>)/undefined
 const getCategory = compose(map(nth(2)), parse(syslogpattern));
 
-// getId :: (str: syslog) => (str: <id>)/undefined
-const getId = compose(map(nth(4)), parse(syslogpattern));
-
 // getEvent :: (str: syslog) => (str: <event>)/undefined
 const getEvent = compose(map(nth(6)), parse(syslogpattern));
 
-export { getTime, getCategory, getId, getEvent, getExtra };
+// refactor: apply ramda here & looking for exceptional case
+const composeSyslogMsg = (msg, ip) => {
+  const timeString = getTime(msg).right();
+  const time = new Date(timeString).toISOString();
+  return {
+    time,
+    ip,
+    cat: getCategory(msg).right(),
+    event: getEvent(msg).right(),
+    action: (getExtra(msg).right()) ? getExtra(msg).right().action : undefined,
+    // message: ignore for now
+  };
+};
+
+export { composeSyslogMsg };
