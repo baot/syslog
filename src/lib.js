@@ -60,14 +60,14 @@ const getCategory = compose(map(nth(2)), parse(syslogpattern));
 const getEvent = compose(map(nth(6)), parse(syslogpattern));
 
 // refactor: apply ramda here & looking for exceptional case
+// null in time, ip, cat, event indicates malformed logs
 const composeSyslogMsg = (msg, ip) => {
-  const timeString = getTime(msg).right();
-  const time = new Date(timeString).toISOString();
+  const time = getTime(msg).isRight() ? new Date(getTime(msg).right()).toISOString() : null;
   return {
     time,
     ip,
-    cat: getCategory(msg).right(),
-    event: getEvent(msg).right(),
+    cat: getCategory(msg).isRight() ? getCategory(msg).right() : null,
+    event: getCategory(msg).isRight() ? getEvent(msg).right() : null,
     action: (getExtra(msg).isRight()) ? getExtra(msg).right().action : undefined,
     // message: ignore for now
   };

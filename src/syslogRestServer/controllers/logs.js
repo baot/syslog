@@ -8,7 +8,7 @@ import db from '../../db';
  * return most {num} recent received logs
  */
 const getLogs = (req, res, num) => {
-  db.find({}, { createdAt: 0, updatedAt: 0 })
+  db.find({}, { createdAt: 0, updatedAt: 0, _id: 0 })
     .sort({ createdAt: -1 })
     .limit(num)
     .exec((err, docs) => {
@@ -23,9 +23,10 @@ const getLogs = (req, res, num) => {
 
 /*
  * return logs with matched params
- * todo: refactor
+ * todo: refactor using funtional technique & looking at errors case
  */
 const getLogsWithParams = (req, res) => {
+  // return error when params not in the valid list?
   const params = req.query;
   const num = params.num ? params.num : 20;
   if (isEmpty(params) || (keys(params).length === 1 && has('num')(params))) {
@@ -54,10 +55,10 @@ const getLogsWithParams = (req, res) => {
 
       return passed;
     },
-  }, { createdAt: 0, updatedAt: 0 }).limit(num).exec((err, docs) => {
+  }, { createdAt: 0, updatedAt: 0, _id: 0 }).limit(num).exec((err, docs) => {
     if (err) {
       console.error(err);
-      res.status(500).json({ error: 'something wrong' });
+      res.status(500).json({ error: 'something went wrong' });
       return;
     }
 
